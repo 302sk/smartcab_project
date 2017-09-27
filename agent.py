@@ -49,9 +49,13 @@ class LearningAgent(Agent):
             self.alpha = 0
         else:
             self.trial_times += 1.0  #current trial times
-            self.epsilon = self.epsilon - 0.02 if self.epsilon - 0.02 > 0 else self.epsilon #如果持续衰减探索因子到小于0,则停止衰减
+            # self.epsilon = self.epsilon - 0.02 if self.epsilon - 0.02 > 0 else self.epsilon #如果持续衰减探索因子到小于0,则停止衰减
             # self.epsilon = 1.0 / math.sqrt(self.trial_times)
             # self.epsilon = math.fabs(math.cos(self.alpha * self.trial_times))
+            # 这里更换了探索因子衰减函数,是为了让后期训练更多的采用先前经验,而不是随机探索,同时这个函数会增多后期强化经验的训练
+            #
+            # times_ctl = -0.001
+            self.epsilon = math.exp(-1 * self.alpha * self.trial_times)
 
         return None
 
@@ -75,8 +79,8 @@ class LearningAgent(Agent):
                 return str(s)
 
         # Set 'state' as a tuple of relevant data for the agent
-        state = state2str(waypoint) + '-' + state2str(inputs['light']) + '-' + state2str(inputs['left']) + '-' + state2str(inputs['oncoming'])
-        # state = (inputs['light'],  inputs['oncoming'], waypoint)
+        # state = state2str(waypoint) + '-' + state2str(inputs['light']) + '-' + state2str(inputs['left']) + '-' + state2str(inputs['oncoming'])
+        state = (inputs['light'],  inputs['right'], inputs['left'], inputs['oncoming'], waypoint)
 
         if self.learning:
             self.Q[state] = self.Q.get(state, {None: 0.0, 'forward': 0.0, 'left': 0.0, 'right': 0.0})
@@ -223,7 +227,7 @@ def run():
     #   learning   - set to True to force the driving agent to use Q-learning
     #    * epsilon - continuous value for the exploration factor, default is 1
     #    * alpha   - continuous value for the learning rate, default is 0.5
-    agent = env.create_agent(LearningAgent, learning=True, epsilon=1.0, alpha=0.01)
+    agent = env.create_agent(LearningAgent, learning=True, epsilon=1.0, alpha=0.003)
 
     ##############
     # Follow the driving agent
@@ -238,14 +242,14 @@ def run():
     #   display      - set to False to disable the GUI if PyGame is enabled
     #   log_metrics  - set to True to log trial and simulation results to /logs
     #   optimized    - set to True to change the default log file name
-    sim = Simulator(env, update_delay=0.01,log_metrics=True, optimized=False)
+    sim = Simulator(env, update_delay=0.001,log_metrics=True, optimized=True)
 
     ##############
     # Run the simulator
     # Flags:
     #   tolerance  - epsilon tolerance before beginning testing, default is 0.05
     #   n_test     - discrete number of testing trials to perform, default is 0
-    sim.run(n_test=100, tolerance=0.05)
+    sim.run(n_test=100, tolerance=0.002)
 
     pass
 
