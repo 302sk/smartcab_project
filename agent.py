@@ -55,7 +55,11 @@ class LearningAgent(Agent):
             # 这里更换了探索因子衰减函数,是为了让后期训练更多的采用先前经验,而不是随机探索,同时这个函数会增多后期强化经验的训练
             #
             # times_ctl = -0.001
-            self.epsilon = math.exp(-1 * self.alpha * self.trial_times)
+            #self.epsilon = self.epsilon - 0.02
+            self.epsilon = math.exp(-1 * 0.003 * self.trial_times)
+
+            #线性衰减学习率
+            self.alpha = -0.0005 * self.trial_times + 0.52
 
         return None
 
@@ -227,7 +231,7 @@ def run():
     #   learning   - set to True to force the driving agent to use Q-learning
     #    * epsilon - continuous value for the exploration factor, default is 1
     #    * alpha   - continuous value for the learning rate, default is 0.5
-    agent = env.create_agent(LearningAgent, learning=True, epsilon=1.0, alpha=0.003)
+    agent = env.create_agent(LearningAgent, learning=True, epsilon=1.0, alpha=0.5)
 
     ##############
     # Follow the driving agent
@@ -249,7 +253,7 @@ def run():
     # Flags:
     #   tolerance  - epsilon tolerance before beginning testing, default is 0.05
     #   n_test     - discrete number of testing trials to perform, default is 0
-    sim.run(n_test=100, tolerance=0.002)
+    sim.run(n_test=100, tolerance=0.05)
 
     pass
 
