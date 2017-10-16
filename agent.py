@@ -86,8 +86,6 @@ class LearningAgent(Agent):
         # state = state2str(waypoint) + '-' + state2str(inputs['light']) + '-' + state2str(inputs['left']) + '-' + state2str(inputs['oncoming'])
         state = (inputs['light'],  inputs['right'], inputs['left'], inputs['oncoming'], waypoint)
 
-        if self.learning:
-            self.Q[state] = self.Q.get(state, {None: 0.0, 'forward': 0.0, 'left': 0.0, 'right': 0.0})
 
         return state
 
@@ -102,10 +100,13 @@ class LearningAgent(Agent):
         # Calculate the maximum Q-value of all actions for a given state
 
         maxQ = -999.0
-        for act in self.valid_actions:
-            q = self.Q[state][act]
-            if q > maxQ:
-                maxQ = q
+        # for act in self.valid_actions:
+        #     q = self.Q[state][act]
+        #     if q > maxQ:
+        #         maxQ = q
+
+        # replace above code with max function according to the review
+        maxQ = max(self.Q[state].values())
 
         return maxQ
 
@@ -117,12 +118,16 @@ class LearningAgent(Agent):
         # shuffled_action = random.shuffle(self.env.valid_actions)
         maxQ_actions = []
 
-        for act in self.valid_actions:
-            q = self.Q[state][act]
-            if q == maxQ:
-                maxQ_actions.append(act)
+        # for act in self.valid_actions:
+        #     q = self.Q[state][act]
+        #     if q == maxQ:
+        #         maxQ_actions.append(act)
+        #
+        # return random.choice(maxQ_actions)
 
-        return random.choice(maxQ_actions)
+        #Replace above code with more pythonic code according to review
+        max_keys = [k for k, v in self.Q[state].items() if v == maxQ]
+        return random.choice(max_keys)
 
 
     def createQ(self, state):
@@ -143,6 +148,7 @@ class LearningAgent(Agent):
         #         self.Q[state][action] = 0.0
         if self.learning:
             self.Q[state] = self.Q.get(state, {None: 0.0, 'forward': 0.0, 'left': 0.0, 'right': 0.0})
+
 
         return
 
